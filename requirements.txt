@@ -1,0 +1,3 @@
+onepasswordconnectsdk
+ssl
+ldap3

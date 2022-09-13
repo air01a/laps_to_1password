@@ -24,16 +24,20 @@ class OnePassword:
         except:
             return None
 
-    def update_token(self, item, new_password):
+    def update_token_password(self, item, new_password):
         for field in item.fields:
             if field.id=="password":
                 field.value = new_password
+        self.update_token(item)
+
+
+    def update_token(self, item):
         self.client.update_item(item.id, self.vault_id, item)
                             
     def update_or_create_token(self, servername, username, password):
         item = self.read_token(servername)
         if item:
-            self.update_token(item, password)
+            self.update_token_password(item, password)
         else:
             self.create_token(servername, username, password)
         

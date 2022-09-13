@@ -44,35 +44,14 @@ class LAPSio(object):
         self.domain = AUTH_DOMAIN
 
  
-    def get(self, sAMAccountName='*'):
-        if sAMAccountName != '*' and sAMAccountName is not None:
-            print("[+] Extracting LAPS password of computer: %s ..." % sAMAccountName)
-            print("[+] Searching for the target computer: %s " % sAMAccountName)
-            self.ldap_session.search(
-                self.ldap_server.info.other["defaultNamingContext"],
-                '(sAMAccountName=%s)' % escape_filter_chars(sAMAccountName),
-                attributes=['objectSid']
-            )
-            dn, sid = None, None
-            try:
-                dn = self.ldap_session.entries[0].entry_dn
-                sid = format_sid(self.ldap_session.entries[0]['objectSid'].raw_values[0])
-            except IndexError:
-                print("[!] Computer not found in LDAP: %s" % sAMAccountName)
-
-            if dn is None and sid is None:
-                print("[!] Target computer does not exist! (wrong domain?)")
-            else:
-                print("[+] Target computer found: %s" % dn)
-
-            self.ldap_session.search(dn, '(&(objectCategory=computer)(ms-MCS-AdmPwd=*)(sAMAccountName=%s))' % escape_filter_chars(sAMAccountName), attributes=['sAMAccountName', 'objectSid', 'ms-Mcs-AdmPwd'])
-        else:
-            print("[+] Extracting LAPS passwords of all computers ... ")
-            self.ldap_session.search(
-                self.ldap_server.info.other["defaultNamingContext"],
-                '(&(objectCategory=computer)(ms-MCS-AdmPwd=*)(sAMAccountName=*))',
-                attributes=['sAMAccountName', 'objectSid', 'ms-Mcs-AdmPwd']
-            )
+    def get(self, since=None):
+       
+        print("[+] Extracting LAPS passwords of all computers ... ")
+        self.ldap_session.search(
+            self.ldap_server.info.other["defaultNamingContext"],
+            '(&(objectCategory=computer)(ms-MCS-AdmPwd=*)(sAMAccountName=*))',
+            attributes=['sAMAccountName', 'objectSid', 'ms-Mcs-AdmPwd','ms-Mcs-AdmPwdExpirationTime']
+        )
 
         results = []
         for entry in self.ldap_session.response:
